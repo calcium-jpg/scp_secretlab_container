@@ -10,20 +10,21 @@ RUN dpkg --add-architecture i386
 RUN apt-get update
 RUN apt-get -y install mono-complete lib32gcc-s1
 
-RUN useradd -u 1500 -m user
+RUN useradd -m user
 USER user
 
 RUN mkdir /home/user/steam
-ADD --chown=1500 "https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz" /home/user/
+ADD --chown=user "https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz" /home/user/
 RUN tar -zxvf /home/user/steamcmd_linux.tar.gz -C /home/user/steam
 
 RUN mkdir /home/user/scp
 RUN /home/user/steam/steamcmd.sh +force_install_dir /home/user/scp +login anonymous +app_update 996560 validate +quit
 
 RUN mkdir -p /home/user/.config/SCP\ Secret\ Laboratory\/
-COPY --chown=1500 ["eula.json", "/home/user/.config/SCP Secret Laboratory/config/localadmin_internal_data.json"]
+COPY --chown=user ["build/eula.json", "/home/user/.config/SCP Secret Laboratory/config/localadmin_internal_data.json"]
+COPY --chown=user --chmod=755 build/run.sh /home/user/scp
 
 VOLUME ["/home/user/.config/SCP Secret Laboratory/"]
 
 WORKDIR /home/user/scp
-ENTRYPOINT ["./LocalAdmin"]
+ENTRYPOINT ["./run.sh"]
