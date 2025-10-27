@@ -20,9 +20,14 @@ RUN tar -zxvf /home/user/steamcmd_linux.tar.gz -C /home/user/steam
 RUN mkdir /home/user/scp
 RUN /home/user/steam/steamcmd.sh +force_install_dir /home/user/scp +login anonymous +app_update 996560 validate +quit
 
-RUN mkdir -p /home/user/.config/SCP\ Secret\ Laboratory\/
-COPY --chown=user ["build/eula.json", "/home/user/.config/SCP Secret Laboratory/config/localadmin_internal_data.json"]
-COPY --chown=user --chmod=755 build/run.sh /home/user/scp
+RUN printf "#!/bin/sh\n/home/user/steam/steamcmd.sh +force_install_dir /home/user/scp +login anonymous +app_update 996560 validate +quit\nexec ./LocalAdmin" > /home/user/scp/run.sh
+
+RUN chmod +x /home/user/scp/run.sh
+
+RUN mkdir -p "/home/user/.config/SCP Secret Laboratory/config/"
+
+# BY BUILDING THIS IMAGE YOU ACCEPT SCP: SL's EULA
+RUN echo "{\"EulaAccepted\":\"$(date -u +%Y-%m-%dT%H:%M:%S.%NZ)\"}" > "/home/user/.config/SCP Secret Laboratory/config/localadmin_internal_data.json"
 
 VOLUME ["/home/user/.config/SCP Secret Laboratory/"]
 
